@@ -5,8 +5,8 @@ use tokio_postgres::types::{ToSql, Type};
 use tokio_postgres::{Error, Row, SimpleQueryMessage};
 
 use crate::{
-    Client, CopyOutReader, Portal, QueryIter, QueryPortalIter, SimpleQueryIter, Statement,
-    ToStatement,
+    Client, CopyOutReader, GenericClient, Portal, QueryIter, QueryPortalIter, SimpleQueryIter,
+    Statement, ToStatement,
 };
 
 /// A representation of a PostgreSQL database transaction.
@@ -188,5 +188,22 @@ impl<'a> Transaction<'a> {
             depth,
             done: false,
         })
+    }
+}
+
+impl<'a> GenericClient for Transaction<'a> {
+    fn execute(&mut self, query: &Statement, params: &[&dyn ToSql]) -> Result<u64, Error>
+    {
+        self.execute(query, params)
+    }
+    fn query(&mut self, query: &Statement, params: &[&dyn ToSql]) -> Result<Vec<Row>, Error>
+    {
+        self.query(query, params)
+    }
+    fn prepare(&mut self, query: &str) -> Result<Statement, Error> {
+        self.prepare(query)
+    }
+    fn transaction(&mut self) -> Result<Transaction<'_>, Error> {
+        self.transaction()
     }
 }

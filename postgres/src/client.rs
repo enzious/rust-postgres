@@ -384,3 +384,35 @@ where
         }
     }
 }
+
+/// A trait allowing abstraction over connections and transactions
+pub trait GenericClient {
+    /// Like `Client::execute`.
+    fn execute(&mut self, query: &Statement, params: &[&dyn ToSql]) -> Result<u64, Error>;
+
+    /// Like `Client::query`.
+    fn query(&mut self, query: &Statement, params: &[&dyn ToSql]) -> Result<Vec<Row>, Error>;
+
+    /// Like `Client::prepare`.
+    fn prepare(&mut self, query: &str) -> Result<Statement, Error>;
+
+    /// Like `Client::transaction`.
+    fn transaction(&mut self) -> Result<Transaction<'_>, Error>;
+}
+
+impl GenericClient for Client {
+    fn execute(&mut self, query: &Statement, params: &[&dyn ToSql]) -> Result<u64, Error>
+    {
+        self.execute(query, params)
+    }
+    fn query(&mut self, query: &Statement, params: &[&dyn ToSql]) -> Result<Vec<Row>, Error>
+    {
+        self.query_iter(query, params)?.collect()
+    }
+    fn prepare(&mut self, query: &str) -> Result<Statement, Error> {
+        self.prepare(query)
+    }
+    fn transaction(&mut self) -> Result<Transaction<'_>, Error> {
+        self.transaction()
+    }
+}
